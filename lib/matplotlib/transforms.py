@@ -84,6 +84,7 @@ class TransformNode:
     classes that are not really transforms, such as bounding boxes, since some
     transforms depend on bounding boxes to compute their values.
     """
+    __slots__ = ['_parents', '_invalid', '_shorthand_name']
     _gid = 0
 
     # Invalidation may affect only the affine part.  If the
@@ -763,6 +764,9 @@ class Bbox(BboxBase):
         Bbox([[-inf, -inf], [inf, inf]])
     """
 
+    __slots__ = ['_points', '_minpos', '_ignore', '_points', '_points_orig',
+                 '_check']
+
     def __init__(self, points, **kwargs):
         """
         Parameters
@@ -1015,6 +1019,7 @@ class TransformedBbox(BboxBase):
     transform.  When either the child bounding box or transform
     changes, the bounds of this bbox will update accordingly.
     """
+    slots = ['_bbox', '_transform', '_points']
 
     def __init__(self, bbox, transform, **kwargs):
         """
@@ -1084,6 +1089,8 @@ class LockableBbox(BboxBase):
     When the child bounding box changes, the bounds of this bbox will update
     accordingly with the exception of the locked elements.
     """
+    slots = ['_bbox', '_locked_points', '_points']
+
     def __init__(self, bbox, x0=None, y0=None, x1=None, y1=None, **kwargs):
         """
         Parameters
@@ -1686,6 +1693,7 @@ class AffineBase(Transform):
     """
     The base class of all affine transformations of any number of dimensions.
     """
+    __slots__ = ['_inverted']
     is_affine = True
 
     def __init__(self, *args, **kwargs):
@@ -1817,6 +1825,7 @@ class Affine2D(Affine2DBase):
     """
     A mutable 2D affine transformation.
     """
+    __slots__ = ['_mtx']
 
     def __init__(self, matrix=None, **kwargs):
         """
@@ -2100,6 +2109,7 @@ class BlendedGenericTransform(_BlendedMixin, Transform):
     This "generic" version can handle any given child transform in the
     *x*- and *y*-directions.
     """
+    __slots__ = ['_x', '_y', '_affine']
     input_dims = 2
     output_dims = 2
     is_separable = True
@@ -2193,6 +2203,7 @@ class BlendedAffine2D(_BlendedMixin, Affine2DBase):
     This version is an optimization for the case where both child
     transforms are of type `Affine2DBase`.
     """
+    __slots__ = ['_x', '_y', '_mtx']
 
     is_separable = True
 
@@ -2260,6 +2271,7 @@ class CompositeGenericTransform(Transform):
     This "generic" version can handle any two arbitrary
     transformations.
     """
+    __slots__ = ['_a', '_b']
     pass_through = True
 
     def __init__(self, a, b, **kwargs):
@@ -2373,6 +2385,8 @@ class CompositeAffine2D(Affine2DBase):
     This version is an optimization that handles the case where both *a*
     and *b* are 2D affines.
     """
+    __slots__ = ['_a', '_b', '_mtx']
+
     def __init__(self, a, b, **kwargs):
         """
         Create a new composite transform that is the result of
@@ -2450,7 +2464,7 @@ class BboxTransform(Affine2DBase):
     """
     `BboxTransform` linearly transforms points from one `Bbox` to another.
     """
-
+    slots = ['_boxin', '_boxout', '_mtx']
     is_separable = True
 
     def __init__(self, boxin, boxout, **kwargs):
@@ -2494,6 +2508,7 @@ class BboxTransformTo(Affine2DBase):
     `BboxTransformTo` is a transformation that linearly transforms points from
     the unit bounding box to a given `Bbox`.
     """
+    slots = ['_boxout', '_mtx']
 
     is_separable = True
 
@@ -2553,6 +2568,8 @@ class BboxTransformFrom(Affine2DBase):
     `BboxTransformFrom` linearly transforms points from a given `Bbox` to the
     unit bounding box.
     """
+    slots = ['_boxin', '_mtx']
+
     is_separable = True
 
     def __init__(self, boxin, **kwargs):
@@ -2589,6 +2606,8 @@ class ScaledTranslation(Affine2DBase):
     A transformation that translates by *xt* and *yt*, after *xt* and *yt*
     have been transformed by *scale_trans*.
     """
+    slots = ['_scale_trans', '_mtx']
+
     def __init__(self, xt, yt, scale_trans, **kwargs):
         Affine2DBase.__init__(self, **kwargs)
         self._t = (xt, yt)
@@ -2622,6 +2641,8 @@ class TransformedPath(TransformNode):
         path's vertices/codes will not trigger a transform recomputation.
 
     """
+    slots = ['_path', '_transform', '_transformed_path', '_transformed_points']
+
     def __init__(self, path, transform):
         """
         Parameters
@@ -2687,6 +2708,8 @@ class TransformedPatchPath(TransformedPath):
     `~.patches.Patch`. This cached copy is automatically updated when the
     non-affine part of the transform or the patch changes.
     """
+    __slots__ = ['_patch']
+
     def __init__(self, patch):
         """
         Parameters
